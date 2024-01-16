@@ -2,21 +2,38 @@ const Book = require('../models/book');
 const ExpressError = require('../utils/ExpressError');
 
 module.exports.index = async (req, res) => {
-    const genre = req.query.genre;
-    if (genre) {
+    const {genre, author} = req.query;
+    if (genre && author) {
+        const booksByAuthorInGenre = await Book.find({ genre: { $in: [genre] }, author: author });
+        if (booksByAuthorInGenre.length > 0) {
+            return res.status(200).json({
+                message: 'success',
+                books: booksByAuthorInGenre,
+            });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books by ${author} in ${genre}`, 404);
+            return res.status(err.statusCode).json({ err });
+        }
+    } else if (genre) {
         const booksByGenre = await Book.find({ genre: { $in: [genre] } });
         if (booksByGenre.length > 0) {
             return res.status(200).json({
                 status: 'success',
                 books: booksByGenre,
             });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books in ${genre}`, 404);
+            return res.status(err.statusCode).json({ err });
         }
+    } else if (author) {
+        //
+    } else {
+        const allBooks = await Book.find({});
+        res.status(200).json({
+            status: 'success',
+            books: allBooks,
+        });
     }
-    const allBooks = await Book.find({});
-    res.status(200).json({
-        status: 'success',
-        books: allBooks,
-    });
 }
 
 module.exports.addBook = async (req, res) => {
