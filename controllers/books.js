@@ -18,7 +18,7 @@ module.exports.index = async (req, res) => {
         const booksByGenre = await Book.find({ genre: { $in: [genre] } });
         if (booksByGenre.length > 0) {
             return res.status(200).json({
-                status: 'success',
+                message: 'success',
                 books: booksByGenre,
             });
         } else {
@@ -39,7 +39,7 @@ module.exports.index = async (req, res) => {
     } else {
         const allBooks = await Book.find({});
         res.status(200).json({
-            status: 'success',
+            message: 'success',
             books: allBooks,
         });
     }
