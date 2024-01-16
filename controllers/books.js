@@ -26,7 +26,16 @@ module.exports.index = async (req, res) => {
             return res.status(err.statusCode).json({ err });
         }
     } else if (author) {
-        //
+        const booksByAuthor = await Book.find({ author: author });
+        if (booksByAuthor.length > 0) {
+            return res.status(200).json({
+                message: 'success',
+                books: booksByAuthor,
+            });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books by ${author}`, 404);
+            return res.status(err.statusCode).json({ err });
+        }
     } else {
         const allBooks = await Book.find({});
         res.status(200).json({
