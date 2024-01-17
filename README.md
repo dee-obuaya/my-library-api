@@ -127,3 +127,17 @@ Sample response:
     }
 }
 ```
+
+
+### `DELETE /books/:id`
+- deletes the book with the specified `id`.
+- returns the following as key-value pairs:
+    - `message`: 'Deleted {book.title}'.
+
+Sample request: `curl -X DELETE http://localhost:3000/books/659ec7911954d332944e5a93`
+Sample response:
+``` json
+{
+    "message":"Deleted The Lost Symbol"
+}
+```
