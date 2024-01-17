@@ -2,9 +2,12 @@ const Book = require('../models/book');
 const ExpressError = require('../utils/ExpressError');
 
 module.exports.index = async (req, res) => {
-    const {genre, author} = req.query;
+    const { genre, author, rating } = req.query;
     if (genre && author) {
-        const booksByAuthorInGenre = await Book.find({ genre: { $in: [genre] }, author: author });
+        const booksByAuthorInGenre = await Book.find({
+            genre: { $in: [genre] },
+            author: author
+        });
         if (booksByAuthorInGenre.length > 0) {
             return res.status(200).json({
                 message: 'success',
@@ -15,8 +18,26 @@ module.exports.index = async (req, res) => {
             const err = new ExpressError(`Sorry we could not find any books by ${author} in ${genre}`, 404);
             return res.status(err.statusCode).json({ err });
         }
+    } else if (genre && rating) {
+        const ratingVal = parseInt(rating);
+        const booksRatedInGenre = await Book.find({
+            genre: { $in: [genre] },
+            rating: { $gte: ratingVal, $lt: ratingVal + 1 }
+        });
+        if (booksRatedInGenre.length > 0) {
+            return res.status(200).json({
+                message: 'success',
+                totalBooks: booksRatedInGenre.length,
+                books: booksRatedInGenre,
+            });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books rated ${ratingVal} in ${genre}`, 404);
+            return res.status(err.statusCode).json({ err });
+        }
     } else if (genre) {
-        const booksByGenre = await Book.find({ genre: { $in: [genre] } });
+        const booksByGenre = await Book.find({
+            genre: { $in: [genre] }
+        });
         if (booksByGenre.length > 0) {
             return res.status(200).json({
                 message: 'success',
@@ -28,7 +49,9 @@ module.exports.index = async (req, res) => {
             return res.status(err.statusCode).json({ err });
         }
     } else if (author) {
-        const booksByAuthor = await Book.find({ author: author });
+        const booksByAuthor = await Book.find({
+            author: author
+        });
         if (booksByAuthor.length > 0) {
             return res.status(200).json({
                 message: 'success',
@@ -37,6 +60,21 @@ module.exports.index = async (req, res) => {
             });
         } else {
             const err = new ExpressError(`Sorry we could not find any books by ${author}`, 404);
+            return res.status(err.statusCode).json({ err });
+        }
+    } else if (rating) {
+        const ratingVal = parseInt(rating);
+        const booksRated = await Book.find({
+            rating: { $gte: ratingVal, $lt: ratingVal + 1 }
+        });
+        if (booksRated.length > 0) {
+            return res.status(200).json({
+                message: 'success',
+                totalBooks: booksRated.length,
+                books: booksRated,
+            });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books rated in the range of ${ratingVal}`, 404);
             return res.status(err.statusCode).json({ err });
         }
     } else {
@@ -50,12 +88,6 @@ module.exports.index = async (req, res) => {
 }
 
 module.exports.addBook = async (req, res) => {
-    // "book": {
-    //     "title": "Rockstar",
-    //     "author": "Jackie Collins",
-    //     "genre": ["Drama", "Fame"]
-    // }
-
     const book = new Book(req.body.book);
     await book.save();
 
@@ -93,4 +125,8 @@ module.exports.getBook = async (req, res) => {
         message: 'success',
         book
     });
+}
+
+module.exports.getBooksInGenre = async (req, res) => {
+    
 }
