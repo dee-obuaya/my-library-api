@@ -30,6 +30,7 @@ Sample response:
     ]
 }
 ```
+
 Sample request (with query): `curl http://localhost:3000/books?genre=Drama&author=Jackie Collins`
 Sample response:
 ``` json
@@ -87,7 +88,7 @@ Sample response:
 - requires `title`, `author`, `genre` in json format as an argument.
 - returns the following as key-value pairs:
     - `book`: an object of the new book in the database.
-    - `message`: 'success'
+    - `message`: 'success'.
 
 Sample request: `curl -X POST http://localhost:3000/books -H 'Content-Type: application/json' -d'{"book": {"title": "Are You Afraid Of The Dark", "author": "Sydney Sheldon", "genre": ["Fiction", "Crime", "Thriller"]}}'`
 
@@ -99,6 +100,30 @@ Sample response:
         "title":"Are You Afraid Of The Dark",
         "author":"Sydney Sheldon",
         "genre":["Fiction","Crime","Thriller"],
-        "_id":"65a71dd552bae444b3b648a9","__v":0}
+        "_id":"65a71dd552bae444b3b648a9",
+        "__v":0
+    }
+}
+```
+
+### `PUT /books/:id`
+- updates the book with the specified `id`.
+- requires `title`, `author`, `genre` in json format as an argument.
+- returns the following as key-value pairs:
+    - `message`: 'success'.
+    - `updatedBook`: an object of the updated book in the database.
+
+Sample request: `curl -X PUT http://localhost:3000/books/65a71dd552bae444b3b648a9 -H 'Content-Type: application/json' -d'{"book": {"title": "Are You Afraid Of The Dark?", "author": "Sydney Sheldon", "genre": ["Fiction", "Thriller"]}}'`
+Sample response:
+``` json
+{
+    "message":"success",
+    "updatedBook":{
+        "_id":"65a71dd552bae444b3b648a9",
+        "title":"Are You Afraid Of The Dark?",
+        "author":"Sydney Sheldon",
+        "genre":["Fiction","Thriller"],
+        "__v":0
+    }
 }
 ```
