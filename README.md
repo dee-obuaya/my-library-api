@@ -79,3 +79,24 @@ Sample response:
     }
 }
 ```
+
+### `POST /books`
+- posts a new book to the database.
+- requires `title`, `author`, `genre` in json format as an argument.
+- returns the following as key-value pairs:
+    - `book`: an object of the new book in the database.
+    - `message`: 'success'
+
+Sample request: `curl -X POST http://localhost:3000/books -H 'Content-Type: application/json' -d'{"book": {"title": "Are You Afraid Of The Dark", "author": "Sydney Sheldon", "genre": ["Fiction", "Crime", "Thriller"]}}'`
+
+Sample response:
+``` json
+{
+    "message":"success",
+    "book":{
+        "title":"Are You Afraid Of The Dark",
+        "author":"Sydney Sheldon",
+        "genre":["Fiction","Crime","Thriller"],
+        "_id":"65a71dd552bae444b3b648a9","__v":0}
+}
+```
