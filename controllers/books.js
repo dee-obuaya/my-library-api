@@ -56,6 +56,7 @@ module.exports.addBook = async (req, res) => {
     await book.save();
 
     res.status(200).json({
+        message: 'success',
         book: book
     });
 }
