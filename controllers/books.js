@@ -8,6 +8,7 @@ module.exports.index = async (req, res) => {
         if (booksByAuthorInGenre.length > 0) {
             return res.status(200).json({
                 message: 'success',
+                totalBooks: booksByAuthorInGenre.length,
                 books: booksByAuthorInGenre,
             });
         } else {
@@ -19,6 +20,7 @@ module.exports.index = async (req, res) => {
         if (booksByGenre.length > 0) {
             return res.status(200).json({
                 message: 'success',
+                totalBooks: booksByGenre.length,
                 books: booksByGenre,
             });
         } else {
@@ -30,6 +32,7 @@ module.exports.index = async (req, res) => {
         if (booksByAuthor.length > 0) {
             return res.status(200).json({
                 message: 'success',
+                totalBooks: booksByAuthor.length,
                 books: booksByAuthor,
             });
         } else {
@@ -40,6 +43,7 @@ module.exports.index = async (req, res) => {
         const allBooks = await Book.find({});
         res.status(200).json({
             message: 'success',
+            totalBooks: allBooks.length,
             books: allBooks,
         });
     }
