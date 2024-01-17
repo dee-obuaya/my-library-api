@@ -15,5 +15,8 @@ router.route('/:id')
 
 router.get('/:title', catchAsync(books.getBook));
 
+router.get('/in/:genre', catchAsync(books.getBooksInGenre));
+
+
 
 module.exports = router;
