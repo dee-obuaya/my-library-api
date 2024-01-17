@@ -5,7 +5,7 @@ Welcome to my digital library where I try to keep track of books I've read and s
 
 ### `GET /books`
 - fetches all books available.
-- returns two objects, `message` and `books` with the values `success` and an array with  a list of book objects respectively.
+- returns two objects, `message`, `totalBooks` and `books` with the values `success`, an integer and an array with a list of book objects respectively.
 - needs no arguments, but can take `genre` or `author` or both as an optional query if searching for something specific.
 - additional query (`genre` or `author`) is case sensitive and the first letter must be capitalized.
 
@@ -14,6 +14,7 @@ Sample response:
 ``` json
 {
     "message": "success",
+    "totalBooks": 1,
     "books": [
         {
             "_id": "659ec7911954d332944e5a96",
@@ -34,6 +35,7 @@ Sample response:
 ``` json
 {
     "message": "success",
+    "totalBooks": 2,
     "books": [
         {
             "_id": "659ec7911954d332944e5a96",
