@@ -2,37 +2,8 @@ const Book = require('../models/book');
 const ExpressError = require('../utils/ExpressError');
 
 module.exports.index = async (req, res) => {
-    const { genre, author, rating } = req.query;
-    if (genre && author) {
-        const booksByAuthorInGenre = await Book.find({
-            genre: { $in: [genre] },
-            author: author
-        });
-        if (booksByAuthorInGenre.length > 0) {
-            return res.status(200).json({
-                message: 'success',
-                totalBooks: booksByAuthorInGenre.length,
-                books: booksByAuthorInGenre,
-            });
-        } else {
-            const err = new ExpressError(`Sorry we could not find any books by ${author} in ${genre}`, 404);
-            return res.status(err.statusCode).json({ err });
-        }
-    } else if (author) {
-        const booksByAuthor = await Book.find({
-            author: author
-        });
-        if (booksByAuthor.length > 0) {
-            return res.status(200).json({
-                message: 'success',
-                totalBooks: booksByAuthor.length,
-                books: booksByAuthor,
-            });
-        } else {
-            const err = new ExpressError(`Sorry we could not find any books by ${author}`, 404);
-            return res.status(err.statusCode).json({ err });
-        }
-    } else if (rating) {
+    const { rating } = req.query;
+    if (rating) {
         const ratingVal = parseInt(rating);
         const booksRated = await Book.find({
             rating: { $gte: ratingVal, $lt: ratingVal + 1 }
@@ -47,14 +18,14 @@ module.exports.index = async (req, res) => {
             const err = new ExpressError(`Sorry we could not find any books rated in the range of ${ratingVal}`, 404);
             return res.status(err.statusCode).json({ err });
         }
-    } else {
-        const allBooks = await Book.find({});
-        res.status(200).json({
-            message: 'success',
-            totalBooks: allBooks.length,
-            books: allBooks,
-        });
     }
+    const allBooks = await Book.find({});
+    res.status(200).json({
+        message: 'success',
+        totalBooks: allBooks.length,
+        books: allBooks,
+    });
+
 }
 
 module.exports.addBook = async (req, res) => {
@@ -85,7 +56,7 @@ module.exports.deleteBook = async (req, res) => {
     });
 }
 
-module.exports.getBook = async (req, res) => {
+module.exports.getBookByTitle = async (req, res) => {
     const book = await Book.findOne({ title: req.params.title });
     if (!book) {
         const err = new ExpressError('Book not found', 404);
@@ -128,6 +99,41 @@ module.exports.getBooksInGenre = async (req, res) => {
         });
     } else {
         const err = new ExpressError(`Sorry we could not find any books in ${genre}`, 404);
+        return res.status(err.statusCode).json({ err });
+    }
+}
+
+module.exports.getBooksByAuthor = async (req, res) => {
+    const author = req.params.author;
+    const { rating } = req.query;
+    if (rating) {
+        const ratingVal = parseInt(rating);
+        const booksRatedByAuthor = await Book.find({
+            author: author,
+            rating: { $gte: ratingVal, $lt: ratingVal + 1 }
+        });
+        if (booksRatedByAuthor.length > 0) {
+            return res.status(200).json({
+                message: 'success',
+                totalBooks: booksRatedByAuthor.length,
+                books: booksRatedByAuthor,
+            });
+        } else {
+            const err = new ExpressError(`Sorry we could not find any books rated in the range of ${ratingVal} by ${author}`, 404);
+            return res.status(err.statusCode).json({ err });
+        }
+    }
+    const booksByAuthor = await Book.find({
+        author: author
+    });
+    if (booksByAuthor.length > 0) {
+        return res.status(200).json({
+            message: 'success',
+            totalBooks: booksByAuthor.length,
+            books: booksByAuthor,
+        });
+    } else {
+        const err = new ExpressError(`Sorry we could not find any books by ${author}`, 404);
         return res.status(err.statusCode).json({ err });
     }
 }
