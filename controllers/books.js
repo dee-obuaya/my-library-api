@@ -40,7 +40,6 @@ module.exports.addBook = async (req, res) => {
 
 module.exports.updateBook = async (req, res) => {
     const { id } = req.params;
-    console.log(req.body);
     const book = await Book.findByIdAndUpdate(id, { ...req.body.book }, { new: true });
     res.status(200).json({
         message: 'success',
