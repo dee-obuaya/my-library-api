@@ -68,6 +68,25 @@ describe('POST /api/books', () => {
     });
 });
 
+describe('PUT /api/books/:id', () => {
+    it('should update a book', async () => {
+        const authKey = process.env.AUTH_KEY;
+        const res = await request(app)
+            .put(`/api/books/65a85f03379657a3a3081c40?authKey=${authKey}`)
+            .send({
+                book: {
+                    title: 'The Lost Symbol',
+                    author: 'Dan Brown',
+                    genre: ['Fiction', 'Adventure', 'Thriller'],
+                    rating: 3.6,
+                }
+            });
+        // console.log(res.statusCode, res.body);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.updatedBook.rating).toBe(3.6);
+    });
+});
+
 afterEach(async () => {
     await mongoose.connection.close();
 });
