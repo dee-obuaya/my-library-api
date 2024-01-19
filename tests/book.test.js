@@ -51,6 +51,23 @@ describe('GET /api/books/by/:author', () => {
     });
 });
 
+describe('POST /api/books', () => {
+    it('should add a book', async () => {
+        const authKey = process.env.AUTH_KEY;
+        const res = await request(app).post(`/api/books?authKey=${authKey}`).send({
+            book: {
+                title: 'Chances',
+                author: 'Jackie Collins',
+                genre: ['Fiction', 'Drama', 'Crime'],
+                rating: 5,
+            }
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.book._id);
+        expect(res.body.book.title).toBe('Chances');
+    });
+});
+
 afterEach(async () => {
     await mongoose.connection.close();
 });
