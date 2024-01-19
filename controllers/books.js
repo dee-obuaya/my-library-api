@@ -32,7 +32,7 @@ module.exports.addBook = async (req, res) => {
     const book = new Book(req.body.book);
     await book.save();
 
-    res.status(200).json({
+    res.json({
         message: 'success',
         book: book
     });
