@@ -81,11 +81,19 @@ describe('PUT /api/books/:id', () => {
                     rating: 3.6,
                 }
             });
-        // console.log(res.statusCode, res.body);
         expect(res.statusCode).toBe(200);
         expect(res.body.updatedBook.rating).toBe(3.6);
     });
 });
+
+describe('DELETE /api/books/:id', () => {
+    it('should delete a book', async () => {
+        const authKey = process.env.AUTH_KEY;
+        const res = await request(app).delete(`/api/books/65a9b977c8a2bdd26a1f381e?authKey=${authKey}`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message);
+    })
+})
 
 afterEach(async () => {
     await mongoose.connection.close();
