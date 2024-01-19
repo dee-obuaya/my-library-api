@@ -50,7 +50,7 @@ module.exports.updateBook = async (req, res) => {
 module.exports.deleteBook = async (req, res) => {
     const { id } = req.params;
     const book = await Book.findByIdAndDelete(id);
-    res.status(200).json({
+    res.json({
         message: `Deleted ${book.title}`,
     });
 }
