@@ -6,14 +6,14 @@ const { isAuthorized, validateBook } = require('../middleware');
 
 
 router.route('/')
-    .get(catchAsync(books.index))
+    .get(catchAsync(books.getAllBooks))
     .post(isAuthorized, validateBook, catchAsync(books.addBook));
 
 router.route('/:id')
     .put(isAuthorized, validateBook, catchAsync(books.updateBook))
     .delete(isAuthorized, catchAsync(books.deleteBook));
 
-router.get('/:title', catchAsync(books.getBook));
+router.get('/:title', catchAsync(books.getBookByTitle));
 
 router.get('/in/:genre', catchAsync(books.getBooksInGenre));
 

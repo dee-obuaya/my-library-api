@@ -1,7 +1,7 @@
 const Book = require('../models/book');
 const ExpressError = require('../utils/ExpressError');
 
-module.exports.index = async (req, res) => {
+module.exports.getAllBooks = async (req, res) => {
     const { rating } = req.query;
     if (rating) {
         const ratingVal = parseInt(rating);
@@ -19,7 +19,7 @@ module.exports.index = async (req, res) => {
             return res.status(err.statusCode).json({ err });
         }
     }
-    const allBooks = await Book.find({});
+    const allBooks = await Book.find();
     res.status(200).json({
         message: 'success',
         totalBooks: allBooks.length,
@@ -63,7 +63,7 @@ module.exports.getBookByTitle = async (req, res) => {
     }
     res.status(200).json({
         message: 'success',
-        book
+        book: book
     });
 }
 
