@@ -9,7 +9,9 @@ const BookSchema = new Schema({
         type: Number,
         max: 5,
         min: 1,
-    }
+    },
+    image: String,
+    bookLink: String
 });
 
 module.exports = mongoose.model('Book', BookSchema);
