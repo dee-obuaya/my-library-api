@@ -93,7 +93,7 @@ describe('DELETE /api/books/:id', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.message);
     })
-})
+});
 
 afterEach(async () => {
     await mongoose.connection.close();
