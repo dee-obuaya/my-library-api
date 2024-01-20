@@ -21,11 +21,11 @@ describe('GET /api/books', () => {
 describe('GET /api/books/:title', () => {
     it('should return an object containing book', async () => {
         const res = await request(app).get(
-            '/api/books/Rockstar'
+            '/api/books/Inferno'
         );
         // console.log(res.statusCode, res.body);
         expect(res.statusCode).toBe(200);
-        expect(res.body.book.author).toBe('Jackie Collins');
+        expect(res.body.book.author).toBe('Dan Brown');
     });
 });
 
@@ -60,6 +60,8 @@ describe('POST /api/books', () => {
                 author: 'Jackie Collins',
                 genre: ['Fiction', 'Drama', 'Crime'],
                 rating: 5,
+                image: 'https://d28dt1r1iq9r00.cloudfront.net/books/santangelo/chances-cover-us-new.webp',
+                bookLink: 'https://www.jackiecollins.com/books/chances'
             }
         });
         expect(res.statusCode).toBe(200);
@@ -72,13 +74,15 @@ describe('PUT /api/books/:id', () => {
     it('should update a book', async () => {
         const authKey = process.env.AUTH_KEY;
         const res = await request(app)
-            .put(`/api/books/65a85f03379657a3a3081c40?authKey=${authKey}`)
+            .put(`/api/books/65ac43864348a7ac3d2e9217?authKey=${authKey}`)
             .send({
                 book: {
                     title: 'The Lost Symbol',
                     author: 'Dan Brown',
                     genre: ['Fiction', 'Adventure', 'Thriller'],
                     rating: 3.6,
+                    image: 'https://danbrown.com/wp-content/themes/danbrown/images/db/covers/tls.jpg',
+                    bookLink: 'https://danbrown.com/the-lost-symbol/',
                 }
             });
         expect(res.statusCode).toBe(200);
