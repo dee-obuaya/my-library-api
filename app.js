@@ -12,7 +12,7 @@ app.use('/api/books', bookRoutes);
 
 
 app.get('/', (req, res) => {
-    res.status(200).json("Welcome to Dumebi's Digital Library");
+    res.status(200).json({message: "Welcome to Dumebi's Digital Library"});
 });
 
 app.use((err, req, res, next) => {
