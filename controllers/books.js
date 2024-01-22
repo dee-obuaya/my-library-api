@@ -2,28 +2,75 @@ const Book = require('../models/book');
 const ExpressError = require('../utils/ExpressError');
 
 module.exports.getAllBooks = async (req, res) => {
-    const { rating } = req.query;
-    if (rating) {
-        const ratingVal = parseInt(rating);
-        const booksRated = await Book.find({
-            rating: { $gte: ratingVal, $lt: ratingVal + 1 }
-        });
-        if (booksRated.length > 0) {
-            return res.status(200).json({
-                message: 'success',
-                totalBooks: booksRated.length,
-                books: booksRated,
-            });
-        } else {
-            const err = new ExpressError(`Sorry we could not find any books rated in the range of ${ratingVal}`, 404);
-            return res.status(err.statusCode).json({ err });
-        }
+    const pageLimit = 8;
+    let { rating, page = 1 } = req.query;
+    if (isNaN(page) || page < 1) {
+        page = 1;
     }
-    const allBooks = await Book.find();
+    const skip = (page - 1) * pageLimit;
+
+    if (rating && !isNaN(rating) && !(rating > 5) && !(rating < 1)) {
+        const ratingVal = parseInt(rating);
+        let result = await Book.aggregate([
+            { $match: { rating: { $gte: ratingVal, $lt: ratingVal + 1 } } },
+            {
+                $facet: { //facet runs these operation sin parallel (at the same time)
+                    metaData: [
+                        { $count: 'totalBooks' },
+                        {
+                            $addFields: {
+                                currentPage: page,
+                                totalPages: { $ceil: { $divide: ['$totalBooks', pageLimit] } },
+                            }
+                        }
+                    ],
+                    data: [
+                        { $sort: { title: 1 } },
+                        { $skip: skip },
+                        { $limit: pageLimit }
+                    ],
+                },
+            },
+        ]);
+
+        result = result[0];
+        const pageInfo = { ...result.metaData[0], booksOnCurrentPage: result.data.length };
+
+        res.status(200).json({
+            message: 'success',
+            pageInfo: pageInfo,
+            books: result.data,
+        });
+
+    }
+
+    let result = await Book.aggregate([
+        {
+            $facet: { //facet runs these operation sin parallel (at the same time)
+                metaData: [
+                    { $count: 'totalBooks' },
+                    {
+                        $addFields: {
+                            currentPage: page,
+                            totalPages: { $ceil: { $divide: ['$totalBooks', pageLimit] } },
+                        }
+                    }
+                ],
+                data: [
+                    { $sort: { title: 1 } },
+                    { $skip: skip },
+                    { $limit: pageLimit }
+                ],
+            },
+        },
+    ]);
+
+    result = result[0];
+    const pageInfo = { ...result.metaData[0], booksOnCurrentPage: result.data.length };
     res.status(200).json({
         message: 'success',
-        totalBooks: allBooks.length,
-        books: allBooks,
+        pageInfo: pageInfo,
+        books: result.data,
     });
 
 }
