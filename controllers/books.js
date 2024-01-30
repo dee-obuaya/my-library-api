@@ -111,16 +111,18 @@ module.exports.deleteBook = async (req, res) => {
 };
 
 module.exports.getBookByTitle = async (req, res) => {
-  const book = await Book.findOne({ title: req.params.title });
-  if (!book) {
-    const err = new ExpressError("Book not found", 404);
-    return res.status(err.statusCode).json({ err });
-  } else {
-    res.status(200).json({
-      message: "success",
-      book: book,
-    });
-  }
+    const bookTitle = req.params.title;
+    const book = await Book.findOne({ title: bookTitle });
+
+    if (!book) {
+      const err = new ExpressError("Book not found", 404);
+      return res.status(err.statusCode).json({ err });
+    } else {
+      res.status(200).json({
+        message: `Showing result for ${bookTitle}`,
+        book: book,
+      });
+    }
 };
 
 module.exports.getBooksInGenre = async (req, res) => {
@@ -168,7 +170,7 @@ module.exports.getBooksInGenre = async (req, res) => {
 
     if (result.data.length > 0) {
       return res.status(200).json({
-        message: "success",
+        message: `Showing results for books in ${genre}`,
         pageInfo: pageInfo,
         books: result.data,
       });
@@ -211,7 +213,7 @@ module.exports.getBooksInGenre = async (req, res) => {
 
   if (result.data.length > 0) {
     return res.status(200).json({
-      message: "success",
+      message: `Showing results for books in ${genre}`,
       pageInfo: pageInfo,
       books: result.data,
     });
