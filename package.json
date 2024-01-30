@@ -24,5 +24,8 @@
     "mongoose": "^8.0.4",
     "supertest": "^6.3.4",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5"
   }
 }
