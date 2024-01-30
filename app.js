@@ -1,9 +1,11 @@
 const express = require('express');
+const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 const bookRoutes = require('./routes/books');
 
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(mongoSanitize());
 
