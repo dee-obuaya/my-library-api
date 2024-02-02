@@ -14,7 +14,7 @@ describe('GET /api/books', () => {
         const res = await request(app).get('/api/books');
         // console.log(res.statusCode, res.body);
         expect(res.statusCode).toBe(200);
-        expect(res.body.totalBooks).toBeGreaterThan(0);
+        expect(res.body.pageInfo.totalBooks).toBeGreaterThan(0);
     });
 });
 
@@ -33,7 +33,7 @@ describe('GET /api/books/in/:genre', () => {
     it('should return an object containing books in the same genre', async () => {
         const res = await request(app).get('/api/books/in/Thriller');
         expect(res.statusCode).toBe(200);
-        expect(res.body.totalBooks).toBeGreaterThan(0);
+        expect(res.body.pageInfo.totalBooks).toBeGreaterThan(0);
         for (let book of res.body.books) {
             expect('Thriller' in book.genre);
         }
@@ -44,7 +44,7 @@ describe('GET /api/books/by/:author', () => {
     it('should return an object containing books by the same author', async () => {
         const res = await request(app).get('/api/books/by/Dan Brown');
         expect(res.statusCode).toBe(200);
-        expect(res.body.totalBooks).toBeGreaterThan(0);
+        expect(res.body.pageInfo.totalBooks).toBeGreaterThan(0);
         for (let book of res.body.books) {
             expect(book.author = 'Dan Brown');
         }
