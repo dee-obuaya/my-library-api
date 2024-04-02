@@ -13,11 +13,13 @@ router.route('/:id')
     .put(isAuthorized, validateBook, catchAsync(books.updateBook))
     .delete(isAuthorized, catchAsync(books.deleteBook));
 
-router.get('/:title', catchAsync(books.getBookByTitle));
+router.get('/find', catchAsync(books.findBooks));
 
-router.get('/in/:genre', catchAsync(books.getBooksInGenre));
+// router.get('/:title', catchAsync(books.getBookByTitle));
 
-router.get('/by/:author', catchAsync(books.getBooksByAuthor));
+// router.get('/in/:genre', catchAsync(books.getBooksInGenre));
+
+// router.get('/by/:author', catchAsync(books.getBooksByAuthor));
 
 
 module.exports = router;
