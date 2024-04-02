@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
@@ -28,8 +29,5 @@
     "mongoose": "^8.0.4",
     "supertest": "^6.3.4",
     "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "cors": "^2.8.5"
   }
 }
