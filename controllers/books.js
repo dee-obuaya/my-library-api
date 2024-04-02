@@ -17,7 +17,7 @@ module.exports.getAllBooks = async (req, res) => {
       { $match: { rating: { $gte: ratingVal, $lt: ratingVal + 1 } } },
       {
         $facet: {
-          //facet runs these operation sin parallel (at the same time)
+          //facet runs these operations in parallel (at the same time)
           metaData: [
             { $count: "totalBooks" },
             {
@@ -81,11 +81,35 @@ module.exports.getAllBooks = async (req, res) => {
 
 module.exports.addBook = async (req, res) => {
   const book = new Book(req.body.book);
-  await book.save();
+  const isDup = async(title, author) => {
+    const dupBookData = await Book.aggregate([
+      { $match: { title: title, author: author } },
+      {
+        $facet: {
+          //facet runs these operations in parallel (at the same time)
+          metaData: [
+            { $count: "book" },
+          ]
+        },
+      },
+    ]);
+    console.log();
+    if ((dupBookData[0].metaData[0].book) === 1) return true;
+  }
+  const dupBook = await isDup(book.title, book.author);
 
-  res.json({
+  if (isDup) {
+    const err = new ExpressError(
+      `That book already exists`,
+      400
+    );
+    return res.status(err.statusCode).json({ err });
+  }
+
+  return res.json({
     message: "success",
     book: book,
+    dupBook: dupBook
   });
 };
 
@@ -110,35 +134,28 @@ module.exports.deleteBook = async (req, res) => {
   });
 };
 
-module.exports.getBookByTitle = async (req, res) => {
-    const bookTitle = req.params.title;
-    const book = await Book.findOne({ title: bookTitle });
-
-    if (!book) {
-      const err = new ExpressError("Book not found", 404);
-      return res.status(err.statusCode).json({ err });
-    } else {
-      res.status(200).json({
-        message: `Showing result for ${bookTitle}`,
-        book: book,
-      });
-    }
-};
-
-module.exports.getBooksInGenre = async (req, res) => {
-  const genre = req.params.genre;
-  let { rating, page = 1 } = req.query;
+module.exports.findBooks = async (req, res) => {
+  let { rating, page = 1, searchQuery } = req.query;
   if (isNaN(page) || page < 1) {
     page = 1;
   }
   const skip = (page - 1) * pageLimit;
+  const ratingVal = parseInt(rating);
 
-  if (rating && !isNaN(rating) && !(rating > 5) && !(rating < 1)) {
-    const ratingVal = parseInt(rating);
+  if (
+    !isNaN(ratingVal) &&
+    !(ratingVal > 5) &&
+    !(ratingVal < 1) &&
+    searchQuery !== ''
+  ) {
     let result = await Book.aggregate([
       {
         $match: {
-          genre: { $regex: genre, $options: "i" },
+          $or: [
+            { author: { $regex: searchQuery, $options: "i" } },
+            { title: { $regex: searchQuery, $options: "i" } },
+            { genre: { $regex: searchQuery, $options: "i" } },
+          ],
           rating: { $gte: ratingVal, $lt: ratingVal + 1 },
         },
       },
@@ -170,76 +187,21 @@ module.exports.getBooksInGenre = async (req, res) => {
 
     if (result.data.length > 0) {
       return res.status(200).json({
-        message: `Showing results for books in ${genre}`,
+        message: `Showing results for ${searchQuery} rated ${ratingVal}`,
         pageInfo: pageInfo,
         books: result.data,
       });
     } else {
       const err = new ExpressError(
-        `Sorry we could not find any books in ${genre} with a rating in the range of ${rating}`,
+        `Sorry we could not find any books matching ${searchQuery} rated ${ratingVal}`,
         404
       );
       return res.status(err.statusCode).json({ err });
     }
-  }
-
-  let result = await Book.aggregate([
-    {
-      $match: {
-        genre: { $regex: genre, $options: "i" },
-      },
-    },
-    {
-      $facet: {
-        metaData: [
-          { $count: "totalBooks" },
-          {
-            $addFields: {
-              currentPage: page,
-              totalPages: { $ceil: { $divide: ["$totalBooks", pageLimit] } },
-            },
-          },
-        ],
-        data: [{ $sort: { title: 1 } }, { $skip: skip }, { $limit: pageLimit }],
-      },
-    },
-  ]);
-
-  result = result[0];
-  const pageInfo = {
-    ...result.metaData[0],
-    booksOnCurrentPage: result.data.length,
-  };
-
-  if (result.data.length > 0) {
-    return res.status(200).json({
-      message: `Showing results for books in ${genre}`,
-      pageInfo: pageInfo,
-      books: result.data,
-    });
-  } else {
-    const err = new ExpressError(
-      `Sorry we could not find any books in ${genre}`,
-      404
-    );
-    return res.status(err.statusCode).json({ err });
-  }
-};
-
-module.exports.getBooksByAuthor = async (req, res) => {
-  const author = req.params.author;
-  let { rating, page = 1 } = req.query;
-  if (isNaN(page) || page < 1) {
-    page = 1;
-  }
-  const skip = (page - 1) * pageLimit;
-
-  if (rating && !isNaN(rating) && !(rating > 5) && !(rating < 1)) {
-    const ratingVal = parseInt(rating);
+  } else if (!isNaN(ratingVal) && !(ratingVal > 5) && !(ratingVal < 1)) {
     let result = await Book.aggregate([
       {
         $match: {
-          author: { $regex: author, $options: "i" },
           rating: { $gte: ratingVal, $lt: ratingVal + 1 },
         },
       },
@@ -271,13 +233,13 @@ module.exports.getBooksByAuthor = async (req, res) => {
 
     if (result.data.length > 0) {
       return res.status(200).json({
-        message: "success",
+        message: `Showing results for books rated ${ratingVal}`,
         pageInfo: pageInfo,
         books: result.data,
       });
     } else {
       const err = new ExpressError(
-        `Sorry we could not find any books by ${author} rated in the range of ${ratingVal}`,
+        `Sorry we could not find any books rated ${ratingVal}`,
         404
       );
       return res.status(err.statusCode).json({ err });
@@ -287,7 +249,11 @@ module.exports.getBooksByAuthor = async (req, res) => {
   let result = await Book.aggregate([
     {
       $match: {
-        author: { $regex: author, $options: "i" },
+        $or: [
+          { author: { $regex: searchQuery, $options: "i" } },
+          { title: { $regex: searchQuery, $options: "i" } },
+          { genre: { $regex: searchQuery, $options: "i" } },
+        ],
       },
     },
     {
@@ -314,13 +280,13 @@ module.exports.getBooksByAuthor = async (req, res) => {
 
   if (result.data.length > 0) {
     return res.status(200).json({
-      message: "success",
+      message: `Showing results for ${searchQuery}`,
       pageInfo: pageInfo,
       books: result.data,
     });
   } else {
     const err = new ExpressError(
-      `Sorry we could not find any books by ${author}`,
+      `Sorry we could not find any books matching ${searchQuery}`,
       404
     );
     return res.status(err.statusCode).json({ err });
