@@ -3,12 +3,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express');
 const session = require('express-session');
+const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');
 const bookRoutes = require('./routes/books');
 
-const dbUrl = process.env.MONGO_URL;
+const dbUrl = process.env.MONGO_DEV_URL;
 
 const app = express();
 app.use(express.json());
@@ -40,13 +41,25 @@ const sessionConfig = {
 };
 
 app.use(session(sessionConfig));
-app.use(helmet());
+app.use(cors());
+app.use(helmet({ crossOriginEmbedderPolicy: false }));
+
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+});
 
 app.use('/api/books', bookRoutes);
 
 
 app.get('/', (req, res) => {
-    res.status(200).json({message: "Welcome to Dumebi's Digital Library"});
+    res.status(200).json({
+        message: "Welcome to Dumebi's Digital Library",
+        goTo: {
+            getAllBooks: "url/api/books",
+            findBook: "url/api/books/find?rating=[any number between 1-5]&searchQuery=[title of book or author]"
+        }
+    });
 });
 
 app.all('*', (req, res, next) => {

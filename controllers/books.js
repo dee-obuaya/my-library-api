@@ -4,50 +4,11 @@ const ExpressError = require("../utils/ExpressError");
 const pageLimit = 8;
 
 module.exports.getAllBooks = async (req, res) => {
-  // const pageLimit = 8;
-  let { rating, page = 1 } = req.query;
+  let { page = 1 } = req.query;
   if (isNaN(page) || page < 1) {
     page = 1;
   }
   const skip = (page - 1) * pageLimit;
-
-  if (rating && !isNaN(rating) && !(rating > 5) && !(rating < 1)) {
-    const ratingVal = parseInt(rating);
-    let result = await Book.aggregate([
-      { $match: { rating: { $gte: ratingVal, $lt: ratingVal + 1 } } },
-      {
-        $facet: {
-          //facet runs these operations in parallel (at the same time)
-          metaData: [
-            { $count: "totalBooks" },
-            {
-              $addFields: {
-                currentPage: page,
-                totalPages: { $ceil: { $divide: ["$totalBooks", pageLimit] } },
-              },
-            },
-          ],
-          data: [
-            { $sort: { title: 1 } },
-            { $skip: skip },
-            { $limit: pageLimit },
-          ],
-        },
-      },
-    ]);
-
-    result = result[0];
-    const pageInfo = {
-      ...result.metaData[0],
-      booksOnCurrentPage: result.data.length,
-    };
-
-    return res.status(200).json({
-      message: "success",
-      pageInfo: pageInfo,
-      books: result.data,
-    });
-  }
 
   let result = await Book.aggregate([
     {
@@ -136,19 +97,67 @@ module.exports.deleteBook = async (req, res) => {
 
 module.exports.findBooks = async (req, res) => {
   let { rating, page = 1, searchQuery } = req.query;
+  let result;
   if (isNaN(page) || page < 1) {
     page = 1;
   }
   const skip = (page - 1) * pageLimit;
   const ratingVal = parseInt(rating);
 
-  if (
+  if (!isNaN(ratingVal) && !(ratingVal > 5) && !(ratingVal < 1) && searchQuery == "") {
+    result = await Book.aggregate([
+      {
+        $match: {
+          rating: { $gte: ratingVal, $lt: ratingVal + 1 },
+        },
+      },
+      {
+        $facet: {
+          metaData: [
+            { $count: "totalBooks" },
+            {
+              $addFields: {
+                currentPage: page,
+                totalPages: { $ceil: { $divide: ["$totalBooks", pageLimit] } },
+              },
+            },
+          ],
+          data: [
+            { $sort: { title: 1 } },
+            { $skip: skip },
+            { $limit: pageLimit },
+          ],
+        },
+      },
+    ]);
+
+    result = result[0];
+    console.log(result);
+    const pageInfo = {
+      ...result.metaData[0],
+      booksOnCurrentPage: result.data.length,
+    };
+
+    if (result.data.length > 0) {
+      return res.status(200).json({
+        message: `Showing results for books rated ${ratingVal}`,
+        pageInfo: pageInfo,
+        books: result.data,
+      });
+    } else {
+      const err = new ExpressError(
+        `Sorry we could not find any books rated ${ratingVal}`,
+        404
+      );
+      return res.status(err.statusCode).json({ err });
+    }
+  } else if (
     !isNaN(ratingVal) &&
     !(ratingVal > 5) &&
     !(ratingVal < 1) &&
-    searchQuery !== ''
+    searchQuery !== ""
   ) {
-    let result = await Book.aggregate([
+    result = await Book.aggregate([
       {
         $match: {
           $or: [
@@ -198,55 +207,9 @@ module.exports.findBooks = async (req, res) => {
       );
       return res.status(err.statusCode).json({ err });
     }
-  } else if (!isNaN(ratingVal) && !(ratingVal > 5) && !(ratingVal < 1)) {
-    let result = await Book.aggregate([
-      {
-        $match: {
-          rating: { $gte: ratingVal, $lt: ratingVal + 1 },
-        },
-      },
-      {
-        $facet: {
-          metaData: [
-            { $count: "totalBooks" },
-            {
-              $addFields: {
-                currentPage: page,
-                totalPages: { $ceil: { $divide: ["$totalBooks", pageLimit] } },
-              },
-            },
-          ],
-          data: [
-            { $sort: { title: 1 } },
-            { $skip: skip },
-            { $limit: pageLimit },
-          ],
-        },
-      },
-    ]);
-
-    result = result[0];
-    const pageInfo = {
-      ...result.metaData[0],
-      booksOnCurrentPage: result.data.length,
-    };
-
-    if (result.data.length > 0) {
-      return res.status(200).json({
-        message: `Showing results for books rated ${ratingVal}`,
-        pageInfo: pageInfo,
-        books: result.data,
-      });
-    } else {
-      const err = new ExpressError(
-        `Sorry we could not find any books rated ${ratingVal}`,
-        404
-      );
-      return res.status(err.statusCode).json({ err });
-    }
   }
 
-  let result = await Book.aggregate([
+  result = await Book.aggregate([
     {
       $match: {
         $or: [
