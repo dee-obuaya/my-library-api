@@ -5,7 +5,7 @@ const app = require("../app");
 require("dotenv").config();
 
 beforeEach(async () => {
-    await mongoose.connect(process.env.MONGO_URL);
+  await mongoose.connect(process.env.MONGO_TEST_URL);
 });
 
 describe("GET /api/books", () => {
@@ -81,5 +81,5 @@ xdescribe("DELETE /api/books/:id", () => {
 });
 
 afterEach(async () => {
-    await mongoose.connection.close();
+  await mongoose.connection.close();
 });
