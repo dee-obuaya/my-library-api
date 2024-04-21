@@ -53,7 +53,13 @@ app.use('/api/books', bookRoutes);
 
 
 app.get('/', (req, res) => {
-    res.status(200).json({message: "Welcome to Dumebi's Digital Library"});
+    res.status(200).json({
+        message: "Welcome to Dumebi's Digital Library",
+        goTo: {
+            getAllBooks: "url/api/books",
+            findBook: "url/api/books/find?rating=[any number between 1-5]&searchQuery=[title of book or author]"
+        }
+    });
 });
 
 app.all('*', (req, res, next) => {
