@@ -9,7 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');
 const bookRoutes = require('./routes/books');
 
-const dbUrl = process.env.MONGO_DEV_URL;
+const dbUrl = process.env.MONGO_URL;
 
 const app = express();
 app.use(express.json());
