@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const mongoose = require('mongoose');
 const app = require('./app');
-const dbUrl = process.env.MONGO_DEV_URL;
+const dbUrl = process.env.MONGO_URL;
 const PORT = process.env.PORT || 3000;
 
 /* Connecting to the database and then starting the server. */
